@@ -11,9 +11,17 @@ const openai = new OpenAI({
   apiKey: apiKey,
 });
 
-type ChatCompletionMessageParam = {
+type MessageContent = {
+  type: "text" | "image_url";
+  text?: string;
+  image_url?: {
+    url: string;
+  };
+};
+
+type Message = {
   role: "system" | "user" | "assistant";
-  content: string;
+  content: string | MessageContent[];
 };
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -44,7 +52,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const base64Image = Buffer.from(arrayBuffer).toString("base64");
 
     // Prepare the messages for OpenAI
-    const messages: ChatCompletionMessageParam[] = [
+    const messages: Message[] = [
       {
         role: "system",
         content:

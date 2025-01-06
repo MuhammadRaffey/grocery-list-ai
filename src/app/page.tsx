@@ -83,8 +83,8 @@ const GroceryOrganizer = () => {
             Smart Grocery List Organizer
           </h1>
           <p className="text-gray-400">
-            Upload a picture of your grocery list, and I'll organize items from
-            most fragile to least fragile
+            Upload a picture of your grocery list, and I will organize items
+            from most fragile to least fragile
           </p>
         </div>
 
