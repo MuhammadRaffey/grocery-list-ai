@@ -11,6 +11,11 @@ const openai = new OpenAI({
   apiKey: apiKey,
 });
 
+type ChatCompletionMessageParam = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const contentType = request.headers.get("content-type");
@@ -38,12 +43,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const arrayBuffer = await file.arrayBuffer();
     const base64Image = Buffer.from(arrayBuffer).toString("base64");
 
-    // Prepare the message for OpenAI
-    const messages = [
+    // Prepare the messages for OpenAI
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content:
+          "You are an AI assistant. Your job is to analyze grocery lists from images provided by the user. Organize the grocery items into a single JSON response containing exactly one ordered list. The list should have the most fragile items at the top and the least fragile items at the bottom to ensure efficient packing and transportation.",
+      },
       {
         role: "user",
         content: [
-          { type: "text", text: "What's in this image?" },
+          {
+            type: "text",
+            text: "Sort the Items so that top is the most fragile and bottom is the least fragile.",
+          },
           {
             type: "image_url",
             image_url: {
@@ -54,17 +67,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     ];
 
-    // Send the request to OpenAI's API
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: messages,
       max_tokens: 300,
-      temperature: 0.2,
+      temperature: 0.7,
     });
 
     const content =
       response.choices[0]?.message?.content || "No response generated.";
-
+    // console.log("OpenAI Response:", content);
     return NextResponse.json({ result: content });
   } catch (error: unknown) {
     console.error("API Error:", error);
